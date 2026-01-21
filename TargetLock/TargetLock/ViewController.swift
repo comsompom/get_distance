@@ -70,7 +70,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             preferredStyle: .alert
         )
         alert.addAction(UIAlertAction(title: "OK", style: .default))
-        present(alert, animated: true)
+        if presentedViewController == nil {
+            present(alert, animated: true)
+        }
     }
     
     func sessionWasInterrupted(_ session: ARSession) {
@@ -87,7 +89,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     // MARK: - The Math Logic
     func calculateDistance(realHeightMeters: Float) {
-        guard let start = startPoint, let end = endPoint, let currentFrame = sceneView.session.currentFrame else { return }
+        guard let start = startPoint, let end = endPoint, 
+              let currentFrame = sceneView.session.currentFrame else { return }
         
         // 1. Calculate height of object on screen (in pixels)
         // We use the distance between the two tapped points in view points,
@@ -147,13 +150,16 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             if let text = alert.textFields?.first?.text, let height = Float(text), height > 0 {
                 self?.calculateDistance(realHeightMeters: height)
             } else {
+                guard let self = self else { return }
                 let errorAlert = UIAlertController(
                     title: "Invalid Input",
                     message: "Please enter a valid height greater than 0.",
                     preferredStyle: .alert
                 )
                 errorAlert.addAction(UIAlertAction(title: "OK", style: .default))
-                self?.present(errorAlert, animated: true)
+                if self.presentedViewController == nil {
+                    self.present(errorAlert, animated: true)
+                }
             }
         }
         
@@ -163,7 +169,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         alert.addAction(calculateAction)
         alert.addAction(cancelAction)
-        present(alert, animated: true, completion: nil)
+        if presentedViewController == nil {
+            present(alert, animated: true, completion: nil)
+        }
     }
     
     // MARK: - Reset Logic
@@ -182,7 +190,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     @objc func showDiagnostics() {
         let diagnosticsVC = DiagnosticsViewController(session: sceneView.session)
         diagnosticsVC.modalPresentationStyle = .formSheet
-        present(diagnosticsVC, animated: true)
+        if presentedViewController == nil {
+            present(diagnosticsVC, animated: true)
+        }
     }
 
     @objc func showHelp() {
@@ -203,7 +213,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
         let alert = UIAlertController(title: "Help", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
-        present(alert, animated: true)
+        if presentedViewController == nil {
+            present(alert, animated: true)
+        }
     }
 
     // MARK: - Drawing Helpers (Visual Feedback)
@@ -233,7 +245,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         rectLayer?.strokeColor = UIColor.yellow.cgColor
         rectLayer?.lineWidth = 3.0
         rectLayer?.lineDashPattern = [10, 5]
-        sceneView.layer.addSublayer(rectLayer!)
+        if let layer = rectLayer {
+            sceneView.layer.addSublayer(layer)
+        }
     }
     
     // MARK: - UI Setup (Boilerplate)
