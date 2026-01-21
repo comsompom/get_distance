@@ -2,9 +2,21 @@
 
 ![TargetLock app icon](TargetLock_icon.png)
 
-## Overview
+[![iOS](https://img.shields.io/badge/iOS-13.0+-blue.svg)](https://www.apple.com/ios/)
+[![Swift](https://img.shields.io/badge/Swift-5.0+-orange.svg)](https://swift.org/)
+[![ARKit](https://img.shields.io/badge/ARKit-Required-green.svg)](https://developer.apple.com/arkit/)
 
-**TargetLock** is an iOS application that measures the distance to objects using your iPhone's camera and ARKit technology. The app uses stadiametric rangefinding, a computer vision technique based on the pinhole camera model, to calculate distances without requiring LiDAR or other specialized hardware.
+## 📱 Overview
+
+**TargetLock** is a professional iOS application that measures the distance to objects using your iPhone's camera and ARKit technology. The app uses stadiametric rangefinding, a computer vision technique based on the pinhole camera model, to calculate distances without requiring LiDAR or other specialized hardware.
+
+### ✨ Key Highlights
+
+- 🎯 **Precise Measurements** - Accurate distance calculations using camera intrinsics
+- 📐 **Simple Interface** - Two-tap measurement process
+- 🔬 **Built-in Diagnostics** - Validate device and camera capabilities
+- 📚 **Helpful Guides** - In-app instructions and calibration tips
+- 🔒 **Privacy First** - All processing done locally, no data collection
 
 ## How It Works
 
@@ -18,16 +30,18 @@ Where:
 - **H** = Real height of the object (e.g., 1.7 meters for an average human)
 - **h** = Height of the object on the screen (in pixels)
 
-## Key Features
+## ✨ Key Features
 
-- **AR-Based Measurement**: Uses ARKit for accurate camera tracking and focal length detection
-- **Simple Two-Tap Interface**: Tap the top and bottom of an object to measure its height on screen
-- **Automatic Calibration**: Uses factory-calibrated camera intrinsics from your iPhone (iPhone 6s and newer)
-- **Real-Time Distance Display**: Shows distance in both meters and feet
-- **Visual Feedback**: Green and red markers indicate top and bottom points, with a yellow line connecting them
-- **Reset Functionality**: Easy reset button to start a new measurement
-- **Diagnostics Screen**: ARKit support, device model, and camera intrinsics
-- **Help Button**: Quick in‑app usage and calibration guidance
+| Feature | Description |
+|---------|-------------|
+| 🎯 **AR-Based Measurement** | Uses ARKit for accurate camera tracking and focal length detection |
+| 👆 **Simple Two-Tap Interface** | Tap the top and bottom of an object to measure its height on screen |
+| 🔧 **Automatic Calibration** | Uses factory-calibrated camera intrinsics from your iPhone (iPhone 6s and newer) |
+| 📊 **Real-Time Display** | Shows distance in both meters and feet simultaneously |
+| 🎨 **Visual Feedback** | Green and red markers with connecting yellow line for clear visualization |
+| 🔄 **Reset Functionality** | Easy reset button to start a new measurement |
+| 🔬 **Diagnostics Screen** | View ARKit support, device model, and camera intrinsics |
+| ❓ **Help Button** | Quick in‑app usage and calibration guidance |
 
 ## Technical Requirements
 
@@ -39,12 +53,14 @@ Where:
   - SceneKit - For AR scene rendering
   - UIKit - For user interface
 
-## Use Cases
+## 🎯 Use Cases
 
-- Measuring distance to people (adults, children)
-- Measuring distance to animals (when you know their approximate height)
-- Measuring distance to any object of known height
-- Educational purposes to understand computer vision principles
+- 👥 **People Measurement** - Measure distance to adults, children, or any person
+- 🐕 **Animal Tracking** - Measure distance to pets or wildlife (when height is known)
+- 📦 **Object Measurement** - Measure distance to any object of known height
+- 🎓 **Educational** - Learn computer vision principles and stadiametric rangefinding
+- 🏗️ **Construction** - Quick distance estimates on job sites
+- 🎯 **Sports & Recreation** - Measure distances in outdoor activities
 
 ## Accuracy Considerations
 
@@ -54,26 +70,70 @@ The accuracy of measurements depends on several factors:
 - **Camera Quality**: The device's camera calibration
 - **Distance**: Generally more accurate for objects at moderate distances (2-20 meters)
 
-## Privacy
+## 🔒 Privacy & Security
 
-The app requires camera access to function but does not:
-- Store or transmit any images or video
-- Collect any personal data
-- Require internet connection
-- Track user location
+TargetLock is designed with privacy in mind:
 
-All processing is done locally on your device.
+✅ **No Data Collection** - The app does not collect, store, or transmit any user data  
+✅ **No Network Access** - Works completely offline, no internet connection required  
+✅ **No Location Tracking** - Location services are not used  
+✅ **Local Processing Only** - All calculations performed on-device  
+✅ **No Image Storage** - Camera feed is processed in real-time, never saved  
 
-## Development
+Your privacy is our priority. All measurements and calculations remain on your device.
 
-This project is built with:
+## 🛠️ Development
+
+### Tech Stack
+
 - **Language**: Swift 5.0+
 - **Interface**: Programmatic UI (no Storyboard)
 - **Minimum iOS**: 13.0
 - **Architecture**: Scene-based app lifecycle
+- **Frameworks**: ARKit, SceneKit, UIKit
 
-## License
+### Project Structure
+
+```
+TargetLock/
+├── TargetLock/
+│   ├── ViewController.swift          # Main AR view controller
+│   ├── DiagnosticsViewController.swift # Diagnostics screen
+│   ├── AppDelegate.swift             # App lifecycle
+│   ├── SceneDelegate.swift           # Scene management
+│   └── Assets.xcassets/              # App icons and assets
+└── TargetLock.xcodeproj/            # Xcode project
+```
+
+## 📚 Documentation
+
+- [How to Use](How_to_use.md) - Detailed usage instructions
+- [Deployment Guide](how_to_deploy.md) - Step-by-step deployment to iPhone
+- [Project Structure](TargetLock/PROJECT_STRUCTURE.md) - Project organization
+- [Improvement Suggestions](IMPROVEMENTS_SUGGESTIONS.md) - Future enhancements
+
+## 🚀 Quick Start
+
+1. Open `TargetLock.xcodeproj` in Xcode
+2. Connect your iPhone (iOS 13.0+)
+3. Select your device and build (⌘R)
+4. Grant camera permission when prompted
+5. Start measuring!
+
+## 📝 License
 
 This project is provided as-is for educational and personal use.
+
+## 🤝 Contributing
+
+Contributions are welcome! Please see [IMPROVEMENTS_SUGGESTIONS.md](IMPROVEMENTS_SUGGESTIONS.md) for ideas on how to improve the app.
+
+## 📧 Support
+
+For issues, questions, or suggestions, please refer to the documentation files or create an issue in the project repository.
+
+---
+
+**Made with ❤️ using ARKit and Swift**
 
 
