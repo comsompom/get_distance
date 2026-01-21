@@ -20,20 +20,22 @@
 - A **yellow dashed line** will connect the two markers
 - A popup dialog will appear asking for the object's height
 
-### Step 3: Enter the Object's Height
-- In the popup dialog, enter the **real-world height** of the object in **meters**
-- Default value is **1.7 meters** (average adult human height)
-- Examples:
-  - Adult human: **1.7** to **1.8** meters
-  - Child: **1.0** to **1.4** meters
-  - Large dog: **0.5** to **0.8** meters
-  - Small dog: **0.3** to **0.5** meters
+### Step 3: Select the Object's Height
+- Choose a **preset** from the list:
+  - Adult Male (1.75m)
+  - Adult Female (1.65m)
+  - Child (1.20m)
+  - Large Dog (0.70m)
+  - Medium Dog (0.50m)
+  - Small Dog (0.30m)
+- Or tap **Custom…** to enter the **real-world height** in **meters**
 - Tap **"Calculate"** to compute the distance
 
 ### Step 4: View the Result
 - The distance will be displayed at the top of the screen
 - Distance is shown in **meters** and **feet**
 - Example: "Distance: 5.23 meters (17.2 ft)"
+- A **Confidence** percentage is shown to indicate measurement reliability
 
 ## Diagnostics Screen
 
@@ -52,12 +54,31 @@ Use Diagnostics to validate your device and camera data:
 Tap **Help** to see short instructions on:
 - How to measure (top tap, bottom tap, enter height)
 - Optional calibration steps
+- Tap **Tutorial** inside Help for a guided quick walkthrough
+
+## Settings
+
+- Tap **Settings** to choose how distances are displayed
+- Options: meters, feet, or both
 
 ## Starting a New Measurement
 
 - Tap the **"Reset"** button in the bottom-right corner
 - This clears all markers and measurements
 - You can now start a new measurement
+
+## Undo and Validation
+
+- Tap **Undo** to remove the last tap (top or bottom) if you make a mistake
+- If a measurement looks unrealistic or inconsistent, the app shows a warning
+- If warnings appear often, consider recalibrating
+
+## Measurement History
+
+- Tap **History** to view recent measurements and stats
+- The list shows distance, height, confidence, and timestamp
+- Tap a row to **Share** or **Delete**
+- Use **Clear All** to remove all saved measurements
 
 ## Tips for Best Results
 

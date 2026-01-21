@@ -11,6 +11,15 @@ TargetLock/
 │   ├── SceneDelegate.swift           # Scene lifecycle delegate (iOS 13+)
 │   ├── ViewController.swift          # Main AR view controller with distance measurement logic
 │   ├── DiagnosticsViewController.swift # Diagnostics screen (ARKit/device/intrinsics)
+│   ├── HistoryViewController.swift     # Measurement history list and share
+│   ├── Measurement.swift               # Measurement model
+│   ├── SettingsViewController.swift    # Settings screen (units)
+│   ├── TutorialViewController.swift    # Tutorial screen
+│   ├── MeasurementCalculator.swift     # Measurement math helper
+│   ├── Preset.swift                    # Height preset model
+│   ├── PresetManager.swift             # Height preset provider
+│   ├── HapticFeedbackManager.swift     # Haptic feedback helper
+│   ├── AppSettings.swift               # UserDefaults-backed settings
 │   ├── Info.plist                    # App configuration and permissions
 │   ├── Assets.xcassets/              # App assets (icons, images)
 │   │   ├── AppIcon.appiconset/        # App icon assets
@@ -23,6 +32,21 @@ TargetLock/
         └── xcschemes/
             └── TargetLock.xcscheme # Build scheme
 ```
+
+## Documentation Files
+
+- `README.md` - Project overview and quick start
+- `How_to_use.md` - Detailed usage instructions
+- `how_to_deploy.md` - Deployment guide
+- `IMPROVEMENTS_SUGGESTIONS.md` - Future ideas
+- `CHANGELOG.md` - Version history
+- `ROADMAP.md` - Planned work
+- `KNOWN_ISSUES.md` - Current limitations
+- `CONTRIBUTING.md` - Contribution guidelines
+- `CREDITS.md` - Acknowledgments
+- `FAQ.md` - Frequently asked questions
+- `VIDEO_DEMO.md` - Demo link
+- `SCREENSHOTS/` - App screenshots
 
 ## Key Files
 

@@ -36,12 +36,20 @@ Where:
 |---------|-------------|
 | 🎯 **AR-Based Measurement** | Uses ARKit for accurate camera tracking and focal length detection |
 | 👆 **Simple Two-Tap Interface** | Tap the top and bottom of an object to measure its height on screen |
+| 🧍 **Quick Height Presets** | Choose common heights (adult, child, pets) or enter custom |
 | 🔧 **Automatic Calibration** | Uses factory-calibrated camera intrinsics from your iPhone (iPhone 6s and newer) |
 | 📊 **Real-Time Display** | Shows distance in both meters and feet simultaneously |
 | 🎨 **Visual Feedback** | Green and red markers with connecting yellow line for clear visualization |
 | 🔄 **Reset Functionality** | Easy reset button to start a new measurement |
 | 🔬 **Diagnostics Screen** | View ARKit support, device model, and camera intrinsics |
 | ❓ **Help Button** | Quick in‑app usage and calibration guidance |
+| ✅ **Confidence Score** | Heuristic confidence based on tracking, lighting, and distance |
+| ↩️ **Undo Tap** | Undo the last tap to correct mistakes |
+| ⚠️ **Measurement Validation** | Warns on unrealistic distances or inconsistent results |
+| 🧾 **Measurement History** | Save and review recent measurements with stats |
+| 📤 **Share/Export** | Share a measurement summary via system share sheet |
+| ⚙️ **Settings** | Choose units display (meters, feet, or both) |
+| 📘 **Tutorial** | Built-in quick tutorial for first-time users |
 
 ## Technical Requirements
 
@@ -61,6 +69,16 @@ Where:
 - 🎓 **Educational** - Learn computer vision principles and stadiametric rangefinding
 - 🏗️ **Construction** - Quick distance estimates on job sites
 - 🎯 **Sports & Recreation** - Measure distances in outdoor activities
+
+## 🆚 Comparison
+
+| Feature | TargetLock | Typical Rangefinder App |
+|---|---|---|
+| ARKit-based measurement | ✅ | ❌ |
+| Manual calibration option | ✅ | ⚠️ (varies) |
+| Diagnostics (intrinsics/ARKit) | ✅ | ❌ |
+| Offline-only, no data collection | ✅ | ⚠️ (varies) |
+| Quick height presets | ✅ | ❌ |
 
 ## Accuracy Considerations
 
@@ -111,6 +129,14 @@ TargetLock/
 - [Deployment Guide](how_to_deploy.md) - Step-by-step deployment to iPhone
 - [Project Structure](TargetLock/PROJECT_STRUCTURE.md) - Project organization
 - [Improvement Suggestions](IMPROVEMENTS_SUGGESTIONS.md) - Future enhancements
+- [Changelog](CHANGELOG.md) - Version history
+- [Roadmap](ROADMAP.md) - Planned work
+- [Known Issues](KNOWN_ISSUES.md) - Current limitations and bugs
+- [Contributing](CONTRIBUTING.md) - How to contribute
+- [Credits](CREDITS.md) - Acknowledgments
+- [FAQ](FAQ.md) - Frequently asked questions
+- [Video Demo](VIDEO_DEMO.md) - Demo link
+- [Screenshots](SCREENSHOTS/) - App screenshots
 
 ## 🚀 Quick Start
 
@@ -120,13 +146,30 @@ TargetLock/
 4. Grant camera permission when prompted
 5. Start measuring!
 
+## ❓ FAQ
+
+**Does TargetLock require internet?**  
+No. All processing is on-device.
+
+**What devices are supported?**  
+iPhone 6s or newer with iOS 13+ (ARKit required).
+
+**Why are my measurements inconsistent?**  
+Tap accuracy, lighting, and object angle all affect results.
+
+## 🛠️ Troubleshooting
+
+- **AR Session Failed**: Restart the app and confirm ARKit support.
+- **Inaccurate Measurements**: Re-tap carefully and verify height input.
+- **Camera Not Working**: Check camera permissions in Settings.
+
 ## 📝 License
 
 This project is provided as-is for educational and personal use.
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please see [IMPROVEMENTS_SUGGESTIONS.md](IMPROVEMENTS_SUGGESTIONS.md) for ideas on how to improve the app.
+Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## 📧 Support
 

@@ -56,6 +56,8 @@ If the `.xcodeproj` file doesn't exist, you'll need to create it:
 2. Select **"Add Files to [Project Name]"**
 3. Navigate to and select:
    - `ViewController.swift`
+   - `HistoryViewController.swift`
+   - `Measurement.swift`
    - `DiagnosticsViewController.swift`
    - `AppDelegate.swift`
    - `SceneDelegate.swift`

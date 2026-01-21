@@ -10,12 +10,21 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var resetButton: UIButton!
     var diagnosticsButton: UIButton!
     var helpButton: UIButton!
+    var undoButton: UIButton!
+    var historyButton: UIButton!
+    var settingsButton: UIButton!
     
     // MARK: - Logic Variables
     var startPoint: CGPoint? // Top of object
     var endPoint: CGPoint?   // Bottom of object
     var rectLayer: CAShapeLayer? // To draw the line/box on screen
     var markers: [CAShapeLayer] = [] // Track all markers for easy removal
+    var recentDistances: [Float] = []
+    var measurementHistory: [Measurement] = []
+
+    private let presetManager = PresetManager()
+    private let measurementCalculator: MeasurementCalculating = MeasurementCalculator()
+    private let haptics = HapticFeedbackManager()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -105,17 +114,30 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let focalLengthPixels = currentFrame.camera.intrinsics.columns.1.y
         
         // 3. Apply Formula: Distance = (FocalLength * RealHeight) / ImageHeight
-        let distanceMeters = (focalLengthPixels * realHeightMeters) / pixelHeight
+        let distanceMeters = measurementCalculator.calculateDistanceMeters(
+            focalLengthPixels: focalLengthPixels,
+            realHeightMeters: realHeightMeters,
+            pixelHeight: pixelHeight
+        )
+
+        let confidence = computeConfidence(
+            distanceMeters: distanceMeters,
+            pixelHeight: pixelHeight,
+            frame: currentFrame
+        )
+        validateMeasurement(distanceMeters: distanceMeters)
+        recordMeasurement(distanceMeters: distanceMeters, heightMeters: realHeightMeters, confidence: confidence)
         
         // Update UI
         DispatchQueue.main.async {
-            self.infoLabel.text = String(format: "Distance: %.2f meters (%.1f ft)", distanceMeters, distanceMeters * 3.28084)
+            self.infoLabel.text = self.formatDistanceLabel(distanceMeters: distanceMeters, confidence: confidence)
         }
     }
 
     // MARK: - Interaction
     @objc func handleTap(_ gesture: UITapGestureRecognizer) {
         let location = gesture.location(in: sceneView)
+        haptics.impactLight()
         
         if startPoint == nil {
             // First Tap (Top of head)
@@ -134,9 +156,43 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
     
     func askForObjectHeight() {
+        let presets = presetManager.presets()
+
+        let sheet = UIAlertController(
+            title: "Select Height",
+            message: "Choose a preset or enter a custom height (meters).",
+            preferredStyle: .actionSheet
+        )
+
+        for preset in presets {
+            sheet.addAction(UIAlertAction(title: preset.title, style: .default) { [weak self] _ in
+                self?.calculateDistance(realHeightMeters: preset.heightMeters)
+            })
+        }
+
+        sheet.addAction(UIAlertAction(title: "Custom…", style: .default) { [weak self] _ in
+            self?.showCustomHeightPrompt()
+        })
+
+        sheet.addAction(UIAlertAction(title: "Cancel", style: .cancel) { [weak self] _ in
+            self?.resetMeasurement()
+        })
+
+        if let popover = sheet.popoverPresentationController {
+            popover.sourceView = self.view
+            popover.sourceRect = CGRect(x: self.view.bounds.midX, y: self.view.bounds.maxY - 80, width: 1, height: 1)
+            popover.permittedArrowDirections = []
+        }
+
+        if presentedViewController == nil {
+            present(sheet, animated: true, completion: nil)
+        }
+    }
+
+    private func showCustomHeightPrompt() {
         let alert = UIAlertController(
-            title: "Object Height",
-            message: "Enter height in meters (e.g. 1.7 for human)",
+            title: "Custom Height",
+            message: "Enter height in meters (e.g. 1.7)",
             preferredStyle: .alert
         )
         
@@ -173,6 +229,97 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             present(alert, animated: true, completion: nil)
         }
     }
+
+    private func computeConfidence(distanceMeters: Float, pixelHeight: Float, frame: ARFrame) -> Float {
+        // Heuristic confidence score based on distance, tap size, lighting, and tracking quality.
+        let distanceScore = clamp(value: 1.0 - (distanceMeters / 20.0), min: 0.2, max: 1.0)
+        let pixelScore = clamp(value: Float(pixelHeight) / 300.0, min: 0.2, max: 1.0)
+
+        let lightScore: Float
+        if let light = frame.lightEstimate {
+            // 1000 is neutral; below ~200 is dim.
+            lightScore = clamp(value: Float(light.ambientIntensity) / 1000.0, min: 0.2, max: 1.0)
+        } else {
+            lightScore = 0.6
+        }
+
+        let trackingScore: Float
+        switch frame.camera.trackingState {
+        case .normal:
+            trackingScore = 1.0
+        case .limited:
+            trackingScore = 0.6
+        case .notAvailable:
+            trackingScore = 0.3
+        }
+
+        // Weighted average.
+        let raw = (0.35 * distanceScore) + (0.25 * pixelScore) + (0.20 * lightScore) + (0.20 * trackingScore)
+        return clamp(value: raw, min: 0.1, max: 1.0)
+    }
+
+    private func clamp(value: Float, min: Float, max: Float) -> Float {
+        if value < min { return min }
+        if value > max { return max }
+        return value
+    }
+
+    private func validateMeasurement(distanceMeters: Float) {
+        var warnings: [String] = []
+
+        if distanceMeters < 0.5 {
+            warnings.append("Very close range (<0.5m). Results may be inaccurate.")
+        } else if distanceMeters > 50.0 {
+            warnings.append("Very long range (>50m). Results may be inaccurate.")
+        }
+
+        if let last = recentDistances.last {
+            let delta = abs(distanceMeters - last)
+            let changeRatio = delta / max(last, 0.1)
+            if changeRatio > 0.5 {
+                warnings.append("Large jump vs last measurement. Consider recalibration.")
+            }
+        }
+
+        recentDistances.append(distanceMeters)
+        if recentDistances.count > 5 {
+            recentDistances.removeFirst()
+        }
+
+        if warnings.isEmpty { return }
+        let message = warnings.joined(separator: "\n")
+        let alert = UIAlertController(title: "Measurement Warning", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        if presentedViewController == nil {
+            present(alert, animated: true)
+        }
+    }
+
+    private func recordMeasurement(distanceMeters: Float, heightMeters: Float, confidence: Float) {
+        let measurement = Measurement(
+            timestamp: Date(),
+            distanceMeters: distanceMeters,
+            heightMeters: heightMeters,
+            confidence: confidence
+        )
+        measurementHistory.append(measurement)
+        if measurementHistory.count > 50 {
+            measurementHistory.removeFirst()
+        }
+    }
+
+    private func formatDistanceLabel(distanceMeters: Float, confidence: Float) -> String {
+        let feet = distanceMeters * 3.28084
+        let confidenceText = String(format: "Confidence: %.0f%%", confidence * 100)
+        switch AppSettings.shared.displayUnit {
+        case .meters:
+            return String(format: "Distance: %.2f meters\n%@", distanceMeters, confidenceText)
+        case .feet:
+            return String(format: "Distance: %.1f ft\n%@", feet, confidenceText)
+        case .both:
+            return String(format: "Distance: %.2f meters (%.1f ft)\n%@", distanceMeters, feet, confidenceText)
+        }
+    }
     
     // MARK: - Reset Logic
     @objc func resetMeasurement() {
@@ -185,6 +332,25 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Remove all markers
         markers.forEach { $0.removeFromSuperlayer() }
         markers.removeAll()
+        recentDistances.removeAll()
+    }
+
+    @objc func undoLastTap() {
+        if endPoint != nil {
+            endPoint = nil
+            rectLayer?.removeFromSuperlayer()
+            rectLayer = nil
+            if let lastMarker = markers.popLast() {
+                lastMarker.removeFromSuperlayer()
+            }
+            infoLabel.text = "Tap bottom of object"
+        } else if startPoint != nil {
+            startPoint = nil
+            if let lastMarker = markers.popLast() {
+                lastMarker.removeFromSuperlayer()
+            }
+            infoLabel.text = "Tap top of object"
+        }
     }
 
     @objc func showDiagnostics() {
@@ -192,6 +358,18 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         diagnosticsVC.modalPresentationStyle = .formSheet
         if presentedViewController == nil {
             present(diagnosticsVC, animated: true)
+        }
+    }
+
+    @objc func showHistory() {
+        let historyVC = HistoryViewController(measurements: measurementHistory)
+        historyVC.onUpdate = { [weak self] updated in
+            self?.measurementHistory = updated
+        }
+        let navController = UINavigationController(rootViewController: historyVC)
+        navController.modalPresentationStyle = .formSheet
+        if presentedViewController == nil {
+            present(navController, animated: true)
         }
     }
 
@@ -212,9 +390,30 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         """
 
         let alert = UIAlertController(title: "Help", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Tutorial", style: .default) { [weak self] _ in
+            self?.showTutorial()
+        })
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         if presentedViewController == nil {
             present(alert, animated: true)
+        }
+    }
+
+    @objc func showSettings() {
+        let settingsVC = SettingsViewController()
+        let navController = UINavigationController(rootViewController: settingsVC)
+        navController.modalPresentationStyle = .formSheet
+        if presentedViewController == nil {
+            present(navController, animated: true)
+        }
+    }
+
+    @objc func showTutorial() {
+        let tutorialVC = TutorialViewController()
+        let navController = UINavigationController(rootViewController: tutorialVC)
+        navController.modalPresentationStyle = .formSheet
+        if presentedViewController == nil {
+            present(navController, animated: true)
         }
     }
 
@@ -281,6 +480,17 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         resetButton.addTarget(self, action: #selector(resetMeasurement), for: .touchUpInside)
         self.view.addSubview(resetButton)
 
+        // Undo Button
+        undoButton = UIButton(type: .system)
+        undoButton.translatesAutoresizingMaskIntoConstraints = false
+        undoButton.backgroundColor = UIColor.systemOrange
+        undoButton.setTitle("Undo", for: .normal)
+        undoButton.setTitleColor(.white, for: .normal)
+        undoButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
+        undoButton.layer.cornerRadius = 10
+        undoButton.addTarget(self, action: #selector(undoLastTap), for: .touchUpInside)
+        self.view.addSubview(undoButton)
+
         // Diagnostics Button
         diagnosticsButton = UIButton(type: .system)
         diagnosticsButton.translatesAutoresizingMaskIntoConstraints = false
@@ -291,6 +501,28 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         diagnosticsButton.layer.cornerRadius = 10
         diagnosticsButton.addTarget(self, action: #selector(showDiagnostics), for: .touchUpInside)
         self.view.addSubview(diagnosticsButton)
+
+        // History Button
+        historyButton = UIButton(type: .system)
+        historyButton.translatesAutoresizingMaskIntoConstraints = false
+        historyButton.backgroundColor = UIColor.systemIndigo
+        historyButton.setTitle("History", for: .normal)
+        historyButton.setTitleColor(.white, for: .normal)
+        historyButton.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
+        historyButton.layer.cornerRadius = 10
+        historyButton.addTarget(self, action: #selector(showHistory), for: .touchUpInside)
+        self.view.addSubview(historyButton)
+
+        // Settings Button
+        settingsButton = UIButton(type: .system)
+        settingsButton.translatesAutoresizingMaskIntoConstraints = false
+        settingsButton.backgroundColor = UIColor.systemPurple
+        settingsButton.setTitle("Settings", for: .normal)
+        settingsButton.setTitleColor(.white, for: .normal)
+        settingsButton.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
+        settingsButton.layer.cornerRadius = 10
+        settingsButton.addTarget(self, action: #selector(showSettings), for: .touchUpInside)
+        self.view.addSubview(settingsButton)
 
         // Help Button
         helpButton = UIButton(type: .system)
@@ -305,7 +537,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Layout Constraints
         NSLayoutConstraint.activate([
-            infoLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            infoLabel.topAnchor.constraint(equalTo: helpButton.bottomAnchor, constant: 12),
             infoLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             infoLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             infoLabel.heightAnchor.constraint(greaterThanOrEqualToConstant: 50),
@@ -315,10 +547,25 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             resetButton.widthAnchor.constraint(equalToConstant: 100),
             resetButton.heightAnchor.constraint(equalToConstant: 50),
 
+            undoButton.bottomAnchor.constraint(equalTo: resetButton.topAnchor, constant: -10),
+            undoButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            undoButton.widthAnchor.constraint(equalToConstant: 100),
+            undoButton.heightAnchor.constraint(equalToConstant: 44),
+
             diagnosticsButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
             diagnosticsButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             diagnosticsButton.widthAnchor.constraint(equalToConstant: 110),
             diagnosticsButton.heightAnchor.constraint(equalToConstant: 36),
+
+            historyButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            historyButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            historyButton.widthAnchor.constraint(equalToConstant: 90),
+            historyButton.heightAnchor.constraint(equalToConstant: 36),
+
+            settingsButton.topAnchor.constraint(equalTo: historyButton.bottomAnchor, constant: 8),
+            settingsButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            settingsButton.widthAnchor.constraint(equalToConstant: 90),
+            settingsButton.heightAnchor.constraint(equalToConstant: 36),
 
             helpButton.topAnchor.constraint(equalTo: diagnosticsButton.bottomAnchor, constant: 8),
             helpButton.trailingAnchor.constraint(equalTo: diagnosticsButton.trailingAnchor),

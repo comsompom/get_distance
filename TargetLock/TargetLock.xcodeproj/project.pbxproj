@@ -13,6 +13,15 @@
 		AA0000010000000000000004 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000004 /* Assets.xcassets */; };
 		AA0000010000000000000005 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000005 /* LaunchScreen.storyboard */; };
 		AA0000010000000000000006 /* DiagnosticsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000008 /* DiagnosticsViewController.swift */; };
+		AA0000010000000000000007 /* Measurement.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000009 /* Measurement.swift */; };
+		AA0000010000000000000008 /* HistoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000000A /* HistoryViewController.swift */; };
+		AA0000010000000000000009 /* Preset.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000000B /* Preset.swift */; };
+		AA000001000000000000000A /* PresetManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000000C /* PresetManager.swift */; };
+		AA000001000000000000000B /* MeasurementCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000000D /* MeasurementCalculator.swift */; };
+		AA000001000000000000000C /* HapticFeedbackManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000000E /* HapticFeedbackManager.swift */; };
+		AA000001000000000000000D /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000000F /* AppSettings.swift */; };
+		AA000001000000000000000E /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000010 /* SettingsViewController.swift */; };
+		AA000001000000000000000F /* TutorialViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000011 /* TutorialViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +33,15 @@
 		AA0000000000000000000006 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AA0000000000000000000007 /* TargetLock.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TargetLock.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA0000000000000000000008 /* DiagnosticsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticsViewController.swift; sourceTree = "<group>"; };
+		AA0000000000000000000009 /* Measurement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Measurement.swift; sourceTree = "<group>"; };
+		AA000000000000000000000A /* HistoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryViewController.swift; sourceTree = "<group>"; };
+		AA000000000000000000000B /* Preset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preset.swift; sourceTree = "<group>"; };
+		AA000000000000000000000C /* PresetManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresetManager.swift; sourceTree = "<group>"; };
+		AA000000000000000000000D /* MeasurementCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementCalculator.swift; sourceTree = "<group>"; };
+		AA000000000000000000000E /* HapticFeedbackManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticFeedbackManager.swift; sourceTree = "<group>"; };
+		AA000000000000000000000F /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		AA0000000000000000000010 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
+		AA0000000000000000000011 /* TutorialViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorialViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,6 +70,15 @@
 				AA0000000000000000000002 /* SceneDelegate.swift */,
 				AA0000000000000000000003 /* ViewController.swift */,
 				AA0000000000000000000008 /* DiagnosticsViewController.swift */,
+				AA000000000000000000000A /* HistoryViewController.swift */,
+				AA0000000000000000000009 /* Measurement.swift */,
+				AA000000000000000000000B /* Preset.swift */,
+				AA000000000000000000000C /* PresetManager.swift */,
+				AA000000000000000000000D /* MeasurementCalculator.swift */,
+				AA000000000000000000000E /* HapticFeedbackManager.swift */,
+				AA000000000000000000000F /* AppSettings.swift */,
+				AA0000000000000000000010 /* SettingsViewController.swift */,
+				AA0000000000000000000011 /* TutorialViewController.swift */,
 				AA0000000000000000000004 /* Assets.xcassets */,
 				AA0000060000000000000001 /* Base.lproj */,
 				AA0000000000000000000006 /* Info.plist */,
@@ -145,6 +172,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA000001000000000000000F /* TutorialViewController.swift in Sources */,
+				AA000001000000000000000E /* SettingsViewController.swift in Sources */,
+				AA000001000000000000000D /* AppSettings.swift in Sources */,
+				AA000001000000000000000C /* HapticFeedbackManager.swift in Sources */,
+				AA000001000000000000000B /* MeasurementCalculator.swift in Sources */,
+				AA000001000000000000000A /* PresetManager.swift in Sources */,
+				AA0000010000000000000009 /* Preset.swift in Sources */,
+				AA0000010000000000000008 /* HistoryViewController.swift in Sources */,
+				AA0000010000000000000007 /* Measurement.swift in Sources */,
 				AA0000010000000000000006 /* DiagnosticsViewController.swift in Sources */,
 				AA0000010000000000000003 /* ViewController.swift in Sources */,
 				AA0000010000000000000001 /* AppDelegate.swift in Sources */,
