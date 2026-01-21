@@ -1,8 +1,10 @@
-# Focal Distance - AR Distance Measurement App
+# TargetLock - AR Distance Measurement App
+
+![TargetLock app icon](TargetLock_icon.png)
 
 ## Overview
 
-**Focal Distance** is an iOS application that measures the distance to objects using your iPhone's camera and ARKit technology. The app uses stadiametric rangefinding, a computer vision technique based on the pinhole camera model, to calculate distances without requiring LiDAR or other specialized hardware.
+**TargetLock** is an iOS application that measures the distance to objects using your iPhone's camera and ARKit technology. The app uses stadiametric rangefinding, a computer vision technique based on the pinhole camera model, to calculate distances without requiring LiDAR or other specialized hardware.
 
 ## How It Works
 
@@ -71,3 +73,5 @@ This project is built with:
 ## License
 
 This project is provided as-is for educational and personal use.
+
+

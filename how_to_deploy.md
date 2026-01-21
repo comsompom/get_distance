@@ -1,6 +1,6 @@
-# How to Deploy Focal Distance App to iPhone
+# How to Deploy TargetLock App to iPhone
 
-This guide provides step-by-step instructions for building and deploying the Focal Distance app to your iPhone without using the App Store. This process uses Xcode's direct deployment feature.
+This guide provides step-by-step instructions for building and deploying the TargetLock app to your iPhone without using the App Store. This process uses Xcode's direct deployment feature.
 
 ## Prerequisites
 
@@ -24,11 +24,11 @@ Before you begin, ensure you have:
 
 ## Step 2: Open the Project in Xcode
 
-1. **Locate the Project Folder**: Navigate to the `FocalDistance` folder in your workspace
+1. **Locate the Project Folder**: Navigate to the `TargetLock` folder in your workspace
 2. **Open in Xcode**: 
-   - Option A: Double-click `FocalDistance.xcodeproj` if it exists
-   - Option B: Open Xcode, go to **File > Open**, and select the `FocalDistance` folder
-   - Option C: Drag the `FocalDistance` folder onto the Xcode icon in your Dock
+   - Option A: Double-click `TargetLock.xcodeproj` if it exists
+   - Option B: Open Xcode, go to **File > Open**, and select the `TargetLock` folder
+   - Option C: Drag the `TargetLock` folder onto the Xcode icon in your Dock
 
 ## Step 3: Create Xcode Project (If Not Already Created)
 
@@ -39,7 +39,7 @@ If the `.xcodeproj` file doesn't exist, you'll need to create it:
 3. Choose **"App"** under iOS
 4. Click **"Next"**
 5. Fill in the project details:
-   - **Product Name**: `FocalDistance`
+   - **Product Name**: `TargetLock`
    - **Team**: Select your Apple ID (or leave blank for now)
    - **Organization Identifier**: `com.yourname` (use your own identifier)
    - **Interface**: **Storyboard** (we'll use programmatic UI)
@@ -66,9 +66,9 @@ If the `.xcodeproj` file doesn't exist, you'll need to create it:
 ## Step 5: Configure Project Settings
 
 1. **Select the Project** in the navigator (top item)
-2. **Select the Target** "FocalDistance"
+2. **Select the Target** "TargetLock"
 3. Go to the **"General"** tab:
-   - **Bundle Identifier**: Change to something unique (e.g., `com.yourname.FocalDistance`)
+   - **Bundle Identifier**: Change to something unique (e.g., `com.yourname.TargetLock`)
    - **Version**: `1.0`
    - **Build**: `1`
    - **Minimum Deployments**: iOS 13.0
@@ -190,11 +190,11 @@ If you prefer using the command line:
 
 ```bash
 # Navigate to project directory
-cd /path/to/FocalDistance
+cd /path/to/TargetLock
 
 # Build for device
-xcodebuild -project FocalDistance.xcodeproj \
-           -scheme FocalDistance \
+xcodebuild -project TargetLock.xcodeproj \
+           -scheme TargetLock \
            -configuration Release \
            -destination 'generic/platform=iOS' \
            build
@@ -224,4 +224,6 @@ If you encounter issues:
 3. Verify all prerequisites are met
 4. Ensure your iPhone meets the requirements (iPhone 6s+, iOS 13+)
 
-Congratulations! You should now have the Focal Distance app running on your iPhone.
+Congratulations! You should now have the TargetLock app running on your iPhone.
+
+

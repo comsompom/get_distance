@@ -1,8 +1,8 @@
-# How to Use Focal Distance App
+# How to Use TargetLock App
 
 ## Getting Started
 
-1. **Launch the App**: Open the Focal Distance app on your iPhone
+1. **Launch the App**: Open the TargetLock app on your iPhone
 2. **Grant Camera Permission**: When prompted, allow the app to access your camera
 3. **Point at Target**: Point your iPhone camera at the object you want to measure (typically a person or animal)
 
@@ -112,3 +112,5 @@ For more accurate measurements:
 - Use a known reference object to verify accuracy
 - Ensure the object is standing straight (not leaning)
 - Measure when the object is perpendicular to your line of sight
+
+
