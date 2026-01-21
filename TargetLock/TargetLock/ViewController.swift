@@ -391,6 +391,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         Support note:
         This project was created to support the Moon Home Agency initiative:
         https://moonhome.agency/
+
+        Developer:
+        Oleg Bourdo — https://www.linkedin.com/in/oleg-bourdo-8a2360139/
         """
 
         let alert = UIAlertController(title: "Help", message: message, preferredStyle: .alert)
