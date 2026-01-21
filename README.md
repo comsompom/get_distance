@@ -26,6 +26,8 @@ Where:
 - **Real-Time Distance Display**: Shows distance in both meters and feet
 - **Visual Feedback**: Green and red markers indicate top and bottom points, with a yellow line connecting them
 - **Reset Functionality**: Easy reset button to start a new measurement
+- **Diagnostics Screen**: ARKit support, device model, and camera intrinsics
+- **Help Button**: Quick in‑app usage and calibration guidance
 
 ## Technical Requirements
 

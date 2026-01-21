@@ -35,6 +35,24 @@
 - Distance is shown in **meters** and **feet**
 - Example: "Distance: 5.23 meters (17.2 ft)"
 
+## Diagnostics Screen
+
+Use Diagnostics to validate your device and camera data:
+
+1. Tap **Diagnostics** (top-right).
+2. Review:
+   - ARKit supported (yes/no)
+   - Device model and iOS version
+   - Camera intrinsics (fx, fy, cx, cy)
+3. Tap **Refresh** to update values.
+4. Tap **Close** to return to the camera view.
+
+## Help Button
+
+Tap **Help** to see short instructions on:
+- How to measure (top tap, bottom tap, enter height)
+- Optional calibration steps
+
 ## Starting a New Measurement
 
 - Tap the **"Reset"** button in the bottom-right corner

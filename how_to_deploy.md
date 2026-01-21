@@ -56,6 +56,7 @@ If the `.xcodeproj` file doesn't exist, you'll need to create it:
 2. Select **"Add Files to [Project Name]"**
 3. Navigate to and select:
    - `ViewController.swift`
+   - `DiagnosticsViewController.swift`
    - `AppDelegate.swift`
    - `SceneDelegate.swift`
    - `Info.plist`
@@ -82,6 +83,7 @@ If the `.xcodeproj` file doesn't exist, you'll need to create it:
 5. Go to the **"Info"** tab (or edit `Info.plist`):
    - Ensure `NSCameraUsageDescription` is present with a description
    - Ensure `UIRequiredDeviceCapabilities` includes `arkit`
+   - Ensure `UILaunchStoryboardName` is set to `LaunchScreen`
 
 ## Step 6: Connect Your iPhone
 
@@ -125,6 +127,8 @@ If the `.xcodeproj` file doesn't exist, you'll need to create it:
 1. When the app launches, it will request **Camera** permission
 2. Tap **"OK"** or **"Allow"** to grant camera access
 3. The app should now display the camera view
+4. Optional: Tap **Diagnostics** to verify ARKit support and intrinsics
+5. Optional: Tap **Help** for quick usage and calibration tips
 
 ## Troubleshooting Common Issues
 
