@@ -11,7 +11,7 @@
 		AA0000010000000000000002 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000002 /* SceneDelegate.swift */; };
 		AA0000010000000000000003 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000003 /* ViewController.swift */; };
 		AA0000010000000000000004 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000004 /* Assets.xcassets */; };
-		AA0000010000000000000005 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000005 /* LaunchScreen.storyboard */; };
+		AA0000010000000000000005 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000005 /* Base */; };
 		AA0000010000000000000006 /* DiagnosticsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000008 /* DiagnosticsViewController.swift */; };
 		AA0000010000000000000007 /* Measurement.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000009 /* Measurement.swift */; };
 		AA0000010000000000000008 /* HistoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000000A /* HistoryViewController.swift */; };
@@ -29,7 +29,7 @@
 		AA0000000000000000000002 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		AA0000000000000000000003 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		AA0000000000000000000004 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		AA0000000000000000000005 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		AA0000000000000000000005 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		AA0000000000000000000006 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AA0000000000000000000007 /* TargetLock.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TargetLock.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA0000000000000000000008 /* DiagnosticsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticsViewController.swift; sourceTree = "<group>"; };
@@ -97,7 +97,7 @@
 		AA0000060000000000000001 /* Base.lproj */ = {
 			isa = PBXGroup;
 			children = (
-				AA0000000000000000000005 /* LaunchScreen.storyboard */,
+				AA0000000000000000000005 /* Base */,
 			);
 			path = Base.lproj;
 			sourceTree = "<group>";
@@ -160,7 +160,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA0000010000000000000005 /* LaunchScreen.storyboard in Resources */,
+				AA0000010000000000000005 /* Base in Resources */,
 				AA0000010000000000000004 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -317,9 +317,11 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 6X42CRDLS6;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = TargetLock/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Target Lock";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app needs access to your camera to measure distances using AR technology.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -345,9 +347,11 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 6X42CRDLS6;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = TargetLock/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Target Lock";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app needs access to your camera to measure distances using AR technology.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -391,4 +395,3 @@
 	};
 	rootObject = AA00000B0000000000000001 /* Project object */;
 }
-
