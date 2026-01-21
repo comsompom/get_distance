@@ -62,7 +62,7 @@ This document outlines suggestions to make TargetLock more attractive, user-frie
    - Different colored markers for each measurement
    - Compare distances
 
-5. ✅ **Auto-Detection (Vision Framework)** (implemented)
+5. **Auto-Detection (Vision Framework)**
    - Optional human body detection using VNDetectHumanRectanglesRequest
    - Auto-select top and bottom points
    - Ask user to confirm detected points
@@ -169,7 +169,7 @@ This document outlines suggestions to make TargetLock more attractive, user-frie
 
 ### Medium Priority (Significant Value)
 
-6. ✅ **Auto-Detection** - Major UX improvement but requires Vision framework
+6. **Auto-Detection** - Major UX improvement but requires Vision framework
 7. ⚠️ **Tutorial/Onboarding** - Helps new users
 8. ⚠️ **Settings Screen** - Professional app feel
 9. ✅ **Export/Share** - Useful for users
@@ -189,7 +189,6 @@ This document outlines suggestions to make TargetLock more attractive, user-frie
 - Undo (last tap)
 - Measurement Validation
 - Measurement History (with share/export)
-- Auto-Detection (Vision)
 - Modern UI styling (gradients, shadows, SF Symbols, blur)
 - Animations & feedback (haptics, marker/line animations)
 - Visual indicators (crosshair, grid, angle)

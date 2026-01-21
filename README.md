@@ -56,7 +56,6 @@ Where:
 | ⚙️ **Settings** | Choose units display (meters, feet, or both) |
 | 📘 **Tutorial** | Built-in quick tutorial for first-time users |
 | 🎨 **Theme & Range Colors** | System/light/dark theme and distance color cues |
-| 🧍 **Auto Detection** | Vision-based human detection to auto-mark top/bottom |
 
 ## Technical Requirements
 

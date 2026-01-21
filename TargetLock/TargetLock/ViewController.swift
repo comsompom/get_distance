@@ -1,7 +1,6 @@
 import UIKit
 import SceneKit
 import ARKit
-import Vision
 
 class ViewController: UIViewController, ARSCNViewDelegate {
 
@@ -16,7 +15,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var undoButton: UIButton!
     var historyButton: UIButton!
     var settingsButton: UIButton!
-    var autoDetectButton: UIButton!
     
     // MARK: - Logic Variables
     var startPoint: CGPoint? // Top of object
@@ -30,7 +28,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var lastDistanceMeters: Float?
     var lastConfidence: Float?
     var lastAngleDegrees: Float?
-    var isAutoDetecting = false
 
     private let presetManager = PresetManager()
     private let measurementCalculator: MeasurementCalculating = MeasurementCalculator()
@@ -485,60 +482,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         }
     }
 
-    @objc func autoDetectHuman() {
-        if isAutoDetecting { return }
-        isAutoDetecting = true
-        autoDetectButton.isEnabled = false
-        guard let frame = sceneView.session.currentFrame else {
-            finishAutoDetect()
-            return
-        }
-
-        let request = VNDetectHumanRectanglesRequest { [weak self] request, error in
-            guard let self = self else { return }
-            defer { self.finishAutoDetect() }
-            if let error = error {
-                self.presentSimpleAlert(title: "Auto Detect Failed", message: error.localizedDescription)
-                return
-            }
-
-            // VNDetectHumanRectanglesRequest returns VNDetectedObjectObservation in iOS 13+
-            guard let observation = (request.results as? [VNDetectedObjectObservation])?.first else {
-                self.presentSimpleAlert(title: "No Person Found", message: "Try again with a clearer view of the person.")
-                return
-            }
-
-            DispatchQueue.main.async {
-                if self.presentedViewController == nil {
-                    self.applyDetectedBoundingBox(observation.boundingBox, frame: frame)
-                }
-            }
-        }
-        // Note: maximumObservations is not available in iOS 13, so we just use the first result
-
-        let handler = VNImageRequestHandler(
-            cvPixelBuffer: frame.capturedImage,
-            orientation: cgImageOrientation(),
-            options: [:]
-        )
-        DispatchQueue.global(qos: .userInitiated).async {
-            do {
-                try handler.perform([request])
-            } catch {
-                DispatchQueue.main.async {
-                    self.presentSimpleAlert(title: "Auto Detect Failed", message: error.localizedDescription)
-                    self.finishAutoDetect()
-                }
-            }
-        }
-    }
-
-    private func finishAutoDetect() {
-        DispatchQueue.main.async {
-            self.isAutoDetecting = false
-            self.autoDetectButton.isEnabled = true
-        }
-    }
+    
 
     // MARK: - Drawing Helpers (Visual Feedback)
     func drawMarker(at point: CGPoint, isStart: Bool) {
@@ -675,17 +619,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         settingsButton.addTarget(self, action: #selector(showSettings), for: .touchUpInside)
         self.view.addSubview(settingsButton)
 
-        // Auto Detect Button
-        autoDetectButton = UIButton(type: .system)
-        autoDetectButton.translatesAutoresizingMaskIntoConstraints = false
-        autoDetectButton.backgroundColor = UIColor.systemGreen
-        configureIconButton(autoDetectButton, title: "Auto", symbolName: "person.crop.rectangle")
-        autoDetectButton.setTitleColor(.white, for: .normal)
-        autoDetectButton.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
-        autoDetectButton.layer.cornerRadius = 10
-        autoDetectButton.addTarget(self, action: #selector(autoDetectHuman), for: .touchUpInside)
-        self.view.addSubview(autoDetectButton)
-
         // Help Button
         helpButton = UIButton(type: .system)
         helpButton.translatesAutoresizingMaskIntoConstraints = false
@@ -699,7 +632,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Layout Constraints
         NSLayoutConstraint.activate([
-            infoBlurView.topAnchor.constraint(equalTo: autoDetectButton.bottomAnchor, constant: 16),
+            infoBlurView.topAnchor.constraint(equalTo: settingsButton.bottomAnchor, constant: 16),
             infoBlurView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             infoBlurView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
 
@@ -736,11 +669,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             settingsButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             settingsButton.widthAnchor.constraint(equalToConstant: 120),
             settingsButton.heightAnchor.constraint(equalToConstant: 36),
-
-            autoDetectButton.topAnchor.constraint(equalTo: settingsButton.bottomAnchor, constant: 8),
-            autoDetectButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            autoDetectButton.widthAnchor.constraint(equalToConstant: 120),
-            autoDetectButton.heightAnchor.constraint(equalToConstant: 36),
 
             helpButton.topAnchor.constraint(equalTo: diagnosticsButton.bottomAnchor, constant: 8),
             helpButton.trailingAnchor.constraint(equalTo: diagnosticsButton.trailingAnchor),
@@ -799,7 +727,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
 
     private func applyButtonStyles() {
-        [resetButton, undoButton, diagnosticsButton, helpButton, historyButton, settingsButton, autoDetectButton].forEach {
+        [resetButton, undoButton, diagnosticsButton, helpButton, historyButton, settingsButton].forEach {
             $0.layer.shadowColor = UIColor.black.cgColor
             $0.layer.shadowOpacity = 0.2
             $0.layer.shadowOffset = CGSize(width: 0, height: 2)
@@ -808,7 +736,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
 
     private func updateGradientFrames() {
-        [resetButton, undoButton, diagnosticsButton, helpButton, historyButton, settingsButton, autoDetectButton].forEach {
+        [resetButton, undoButton, diagnosticsButton, helpButton, historyButton, settingsButton].forEach {
             applyGradient(to: $0)
         }
     }
@@ -863,56 +791,4 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         confidenceBar.progressTintColor = color
     }
 
-    private func applyDetectedBoundingBox(_ bbox: CGRect, frame: ARFrame) {
-        // Reset current measurement visuals
-        resetMeasurement()
-
-        let topNormalized = CGPoint(x: bbox.midX, y: bbox.maxY)
-        let bottomNormalized = CGPoint(x: bbox.midX, y: bbox.minY)
-
-        let topPoint = convertNormalizedPointToView(topNormalized, frame: frame)
-        let bottomPoint = convertNormalizedPointToView(bottomNormalized, frame: frame)
-
-        startPoint = topPoint
-        endPoint = bottomPoint
-
-        drawMarker(at: topPoint, isStart: true)
-        drawMarker(at: bottomPoint, isStart: false)
-        drawLine()
-
-        askForObjectHeight()
-    }
-
-    private func convertNormalizedPointToView(_ point: CGPoint, frame: ARFrame) -> CGPoint {
-        // Vision bounding box uses normalized coordinates with origin at bottom-left.
-        let normalized = CGPoint(x: point.x, y: 1.0 - point.y)
-        let interfaceOrientation = view.window?.windowScene?.interfaceOrientation ?? .portrait
-        let transform = frame.displayTransform(for: interfaceOrientation, viewportSize: view.bounds.size)
-        let transformed = normalized.applying(transform)
-        return CGPoint(x: transformed.x * view.bounds.width, y: transformed.y * view.bounds.height)
-    }
-
-    private func cgImageOrientation() -> CGImagePropertyOrientation {
-        let orientation = view.window?.windowScene?.interfaceOrientation ?? .portrait
-        switch orientation {
-        case .portrait:
-            return .right
-        case .portraitUpsideDown:
-            return .left
-        case .landscapeLeft:
-            return .up
-        case .landscapeRight:
-            return .down
-        default:
-            return .right
-        }
-    }
-
-    private func presentSimpleAlert(title: String, message: String) {
-        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
-        if presentedViewController == nil {
-            present(alert, animated: true)
-        }
-    }
 }
