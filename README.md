@@ -10,6 +10,8 @@
 
 **TargetLock** is a professional iOS application that measures the distance to objects using your iPhone's camera and ARKit technology. The app uses stadiametric rangefinding, a computer vision technique based on the pinhole camera model, to calculate distances without requiring LiDAR or other specialized hardware.
 
+This project was created to support the Moon Home Agency initiative: https://moonhome.agency/
+
 ### ✨ Key Highlights
 
 - 🎯 **Precise Measurements** - Accurate distance calculations using camera intrinsics

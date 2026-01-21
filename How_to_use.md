@@ -6,6 +6,8 @@
 2. **Grant Camera Permission**: When prompted, allow the app to access your camera
 3. **Point at Target**: Point your iPhone camera at the object you want to measure (typically a person or animal)
 
+This project was created to support the Moon Home Agency initiative: https://moonhome.agency/
+
 ## Step-by-Step Measurement Process
 
 ### Step 1: Tap the Top of the Object

@@ -387,6 +387,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         • Measure the on‑screen pixel height (h).
         • Compute F = (5m × h) / 1m.
         • Use that F as a correction factor in code.
+
+        Support note:
+        This project was created to support the Moon Home Agency initiative:
+        https://moonhome.agency/
         """
 
         let alert = UIAlertController(title: "Help", message: message, preferredStyle: .alert)
