@@ -30,6 +30,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var lastDistanceMeters: Float?
     var lastConfidence: Float?
     var lastAngleDegrees: Float?
+    var isAutoDetecting = false
 
     private let presetManager = PresetManager()
     private let measurementCalculator: MeasurementCalculating = MeasurementCalculator()
@@ -485,10 +486,17 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
 
     @objc func autoDetectHuman() {
-        guard let frame = sceneView.session.currentFrame else { return }
+        if isAutoDetecting { return }
+        isAutoDetecting = true
+        autoDetectButton.isEnabled = false
+        guard let frame = sceneView.session.currentFrame else {
+            finishAutoDetect()
+            return
+        }
 
         let request = VNDetectHumanRectanglesRequest { [weak self] request, error in
             guard let self = self else { return }
+            defer { self.finishAutoDetect() }
             if let error = error {
                 self.presentSimpleAlert(title: "Auto Detect Failed", message: error.localizedDescription)
                 return
@@ -501,7 +509,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             }
 
             DispatchQueue.main.async {
-                self.applyDetectedBoundingBox(observation.boundingBox, frame: frame)
+                if self.presentedViewController == nil {
+                    self.applyDetectedBoundingBox(observation.boundingBox, frame: frame)
+                }
             }
         }
         // Note: maximumObservations is not available in iOS 13, so we just use the first result
@@ -517,8 +527,16 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             } catch {
                 DispatchQueue.main.async {
                     self.presentSimpleAlert(title: "Auto Detect Failed", message: error.localizedDescription)
+                    self.finishAutoDetect()
                 }
             }
+        }
+    }
+
+    private func finishAutoDetect() {
+        DispatchQueue.main.async {
+            self.isAutoDetecting = false
+            self.autoDetectButton.isEnabled = true
         }
     }
 
@@ -681,7 +699,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Layout Constraints
         NSLayoutConstraint.activate([
-            infoBlurView.topAnchor.constraint(equalTo: helpButton.bottomAnchor, constant: 12),
+            infoBlurView.topAnchor.constraint(equalTo: autoDetectButton.bottomAnchor, constant: 16),
             infoBlurView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             infoBlurView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
 
