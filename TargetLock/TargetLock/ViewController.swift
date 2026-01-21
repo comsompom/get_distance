@@ -1,18 +1,22 @@
 import UIKit
 import SceneKit
 import ARKit
+import Vision
 
 class ViewController: UIViewController, ARSCNViewDelegate {
 
     // MARK: - UI Elements
     var sceneView: ARSCNView!
     var infoLabel: UILabel!
+    var infoBlurView: UIVisualEffectView!
+    var confidenceBar: UIProgressView!
     var resetButton: UIButton!
     var diagnosticsButton: UIButton!
     var helpButton: UIButton!
     var undoButton: UIButton!
     var historyButton: UIButton!
     var settingsButton: UIButton!
+    var autoDetectButton: UIButton!
     
     // MARK: - Logic Variables
     var startPoint: CGPoint? // Top of object
@@ -21,6 +25,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var markers: [CAShapeLayer] = [] // Track all markers for easy removal
     var recentDistances: [Float] = []
     var measurementHistory: [Measurement] = []
+    var crosshairLayer = CAShapeLayer()
+    var gridLayer = CAShapeLayer()
+    var lastDistanceMeters: Float?
+    var lastConfidence: Float?
+    var lastAngleDegrees: Float?
 
     private let presetManager = PresetManager()
     private let measurementCalculator: MeasurementCalculating = MeasurementCalculator()
@@ -29,6 +38,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        NotificationCenter.default.addObserver(self, selector: #selector(handleSettingsChange), name: .appSettingsDidChange, object: nil)
         
         // Configure AR View
         sceneView.delegate = self
@@ -43,6 +53,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+
+        applyTheme()
         
         // Check if ARKit is supported
         if !ARWorldTrackingConfiguration.isSupported {
@@ -63,6 +75,12 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         configuration.planeDetection = []
         configuration.isLightEstimationEnabled = false
         sceneView.session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
+
+        updateGridVisibility()
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self, name: .appSettingsDidChange, object: nil)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -125,12 +143,13 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             pixelHeight: pixelHeight,
             frame: currentFrame
         )
+        let angleDegrees = abs(currentFrame.camera.eulerAngles.x) * 180.0 / .pi
         validateMeasurement(distanceMeters: distanceMeters)
         recordMeasurement(distanceMeters: distanceMeters, heightMeters: realHeightMeters, confidence: confidence)
         
         // Update UI
         DispatchQueue.main.async {
-            self.infoLabel.text = self.formatDistanceLabel(distanceMeters: distanceMeters, confidence: confidence)
+            self.updateInfoDisplay(distanceMeters: distanceMeters, confidence: confidence, angleDegrees: angleDegrees)
         }
     }
 
@@ -308,16 +327,38 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         }
     }
 
-    private func formatDistanceLabel(distanceMeters: Float, confidence: Float) -> String {
+    private func formatDistanceLabel(distanceMeters: Float, confidence: Float, angleDegrees: Float) -> String {
         let feet = distanceMeters * 3.28084
         let confidenceText = String(format: "Confidence: %.0f%%", confidence * 100)
+        let angleText = String(format: "Angle: %.0f°", angleDegrees)
         switch AppSettings.shared.displayUnit {
         case .meters:
-            return String(format: "Distance: %.2f meters\n%@", distanceMeters, confidenceText)
+            return String(format: "Distance: %.2f meters\n%@ • %@", distanceMeters, confidenceText, angleText)
         case .feet:
-            return String(format: "Distance: %.1f ft\n%@", feet, confidenceText)
+            return String(format: "Distance: %.1f ft\n%@ • %@", feet, confidenceText, angleText)
         case .both:
-            return String(format: "Distance: %.2f meters (%.1f ft)\n%@", distanceMeters, feet, confidenceText)
+            return String(format: "Distance: %.2f meters (%.1f ft)\n%@ • %@", distanceMeters, feet, confidenceText, angleText)
+        }
+    }
+
+    private func updateInfoDisplay(distanceMeters: Float, confidence: Float, angleDegrees: Float) {
+        lastDistanceMeters = distanceMeters
+        lastConfidence = confidence
+        lastAngleDegrees = angleDegrees
+        UIView.transition(with: infoLabel, duration: 0.2, options: .transitionCrossDissolve) {
+            self.infoLabel.text = self.formatDistanceLabel(distanceMeters: distanceMeters, confidence: confidence, angleDegrees: angleDegrees)
+        }
+        confidenceBar.setProgress(confidence, animated: true)
+        applyDistanceColor(distanceMeters: distanceMeters)
+    }
+
+    @objc private func handleSettingsChange() {
+        applyTheme()
+        updateGridVisibility()
+        if let distance = lastDistanceMeters,
+           let confidence = lastConfidence,
+           let angle = lastAngleDegrees {
+            updateInfoDisplay(distanceMeters: distance, confidence: confidence, angleDegrees: angle)
         }
     }
     
@@ -424,6 +465,43 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         }
     }
 
+    @objc func autoDetectHuman() {
+        guard let frame = sceneView.session.currentFrame else { return }
+
+        let request = VNDetectHumanRectanglesRequest { [weak self] request, error in
+            guard let self = self else { return }
+            if let error = error {
+                self.presentSimpleAlert(title: "Auto Detect Failed", message: error.localizedDescription)
+                return
+            }
+
+            guard let observation = (request.results as? [VNHumanObservation])?.first else {
+                self.presentSimpleAlert(title: "No Person Found", message: "Try again with a clearer view of the person.")
+                return
+            }
+
+            DispatchQueue.main.async {
+                self.applyDetectedBoundingBox(observation.boundingBox, frame: frame)
+            }
+        }
+        request.maximumObservations = 1
+
+        let handler = VNImageRequestHandler(
+            cvPixelBuffer: frame.capturedImage,
+            orientation: cgImageOrientation(),
+            options: [:]
+        )
+        DispatchQueue.global(qos: .userInitiated).async {
+            do {
+                try handler.perform([request])
+            } catch {
+                DispatchQueue.main.async {
+                    self.presentSimpleAlert(title: "Auto Detect Failed", message: error.localizedDescription)
+                }
+            }
+        }
+    }
+
     // MARK: - Drawing Helpers (Visual Feedback)
     func drawMarker(at point: CGPoint, isStart: Bool) {
         let path = UIBezierPath(arcCenter: point, radius: 8, startAngle: 0, endAngle: 2 * .pi, clockwise: true)
@@ -434,6 +512,17 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         shape.lineWidth = 2.0
         sceneView.layer.addSublayer(shape)
         markers.append(shape)
+
+        let scale = CABasicAnimation(keyPath: "transform.scale")
+        scale.fromValue = 0.5
+        scale.toValue = 1.0
+        let fade = CABasicAnimation(keyPath: "opacity")
+        fade.fromValue = 0.0
+        fade.toValue = 1.0
+        let group = CAAnimationGroup()
+        group.animations = [scale, fade]
+        group.duration = 0.2
+        shape.add(group, forKey: "appear")
     }
     
     func drawLine() {
@@ -451,8 +540,15 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         rectLayer?.strokeColor = UIColor.yellow.cgColor
         rectLayer?.lineWidth = 3.0
         rectLayer?.lineDashPattern = [10, 5]
+        rectLayer?.strokeEnd = 0
         if let layer = rectLayer {
             sceneView.layer.addSublayer(layer)
+            let draw = CABasicAnimation(keyPath: "strokeEnd")
+            draw.fromValue = 0
+            draw.toValue = 1
+            draw.duration = 0.25
+            layer.add(draw, forKey: "drawLine")
+            layer.strokeEnd = 1
         }
     }
     
@@ -463,24 +559,34 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         self.view.addSubview(sceneView)
         
-        // Info Label
+        // Info Label + Blur
+        infoBlurView = UIVisualEffectView(effect: UIBlurEffect(style: .systemChromeMaterialDark))
+        infoBlurView.translatesAutoresizingMaskIntoConstraints = false
+        infoBlurView.layer.cornerRadius = 12
+        infoBlurView.clipsToBounds = true
+        self.view.addSubview(infoBlurView)
+
         infoLabel = UILabel()
         infoLabel.translatesAutoresizingMaskIntoConstraints = false
-        infoLabel.backgroundColor = UIColor.black.withAlphaComponent(0.7)
-        infoLabel.textColor = .white
+        infoLabel.backgroundColor = .clear
+        infoLabel.textColor = .label
         infoLabel.textAlignment = .center
         infoLabel.text = "Tap top of object"
         infoLabel.font = UIFont.boldSystemFont(ofSize: 18)
-        infoLabel.layer.cornerRadius = 10
-        infoLabel.clipsToBounds = true
         infoLabel.numberOfLines = 0
-        self.view.addSubview(infoLabel)
+        infoBlurView.contentView.addSubview(infoLabel)
+
+        confidenceBar = UIProgressView(progressViewStyle: .default)
+        confidenceBar.translatesAutoresizingMaskIntoConstraints = false
+        confidenceBar.progressTintColor = UIColor.systemGreen
+        confidenceBar.trackTintColor = UIColor.white.withAlphaComponent(0.2)
+        infoBlurView.contentView.addSubview(confidenceBar)
         
         // Reset Button
         resetButton = UIButton(type: .system)
         resetButton.translatesAutoresizingMaskIntoConstraints = false
         resetButton.backgroundColor = UIColor.systemBlue
-        resetButton.setTitle("Reset", for: .normal)
+        configureIconButton(resetButton, title: "Reset", symbolName: "arrow.counterclockwise")
         resetButton.setTitleColor(.white, for: .normal)
         resetButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
         resetButton.layer.cornerRadius = 10
@@ -491,7 +597,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         undoButton = UIButton(type: .system)
         undoButton.translatesAutoresizingMaskIntoConstraints = false
         undoButton.backgroundColor = UIColor.systemOrange
-        undoButton.setTitle("Undo", for: .normal)
+        configureIconButton(undoButton, title: "Undo", symbolName: "arrow.uturn.backward")
         undoButton.setTitleColor(.white, for: .normal)
         undoButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
         undoButton.layer.cornerRadius = 10
@@ -502,7 +608,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         diagnosticsButton = UIButton(type: .system)
         diagnosticsButton.translatesAutoresizingMaskIntoConstraints = false
         diagnosticsButton.backgroundColor = UIColor.systemGray
-        diagnosticsButton.setTitle("Diagnostics", for: .normal)
+        configureIconButton(diagnosticsButton, title: "Diagnostics", symbolName: "wrench.and.screwdriver")
         diagnosticsButton.setTitleColor(.white, for: .normal)
         diagnosticsButton.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
         diagnosticsButton.layer.cornerRadius = 10
@@ -513,7 +619,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         historyButton = UIButton(type: .system)
         historyButton.translatesAutoresizingMaskIntoConstraints = false
         historyButton.backgroundColor = UIColor.systemIndigo
-        historyButton.setTitle("History", for: .normal)
+        configureIconButton(historyButton, title: "History", symbolName: "clock.arrow.circlepath")
         historyButton.setTitleColor(.white, for: .normal)
         historyButton.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
         historyButton.layer.cornerRadius = 10
@@ -524,18 +630,29 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         settingsButton = UIButton(type: .system)
         settingsButton.translatesAutoresizingMaskIntoConstraints = false
         settingsButton.backgroundColor = UIColor.systemPurple
-        settingsButton.setTitle("Settings", for: .normal)
+        configureIconButton(settingsButton, title: "Settings", symbolName: "gearshape")
         settingsButton.setTitleColor(.white, for: .normal)
         settingsButton.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
         settingsButton.layer.cornerRadius = 10
         settingsButton.addTarget(self, action: #selector(showSettings), for: .touchUpInside)
         self.view.addSubview(settingsButton)
 
+        // Auto Detect Button
+        autoDetectButton = UIButton(type: .system)
+        autoDetectButton.translatesAutoresizingMaskIntoConstraints = false
+        autoDetectButton.backgroundColor = UIColor.systemGreen
+        configureIconButton(autoDetectButton, title: "Auto", symbolName: "person.crop.rectangle")
+        autoDetectButton.setTitleColor(.white, for: .normal)
+        autoDetectButton.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
+        autoDetectButton.layer.cornerRadius = 10
+        autoDetectButton.addTarget(self, action: #selector(autoDetectHuman), for: .touchUpInside)
+        self.view.addSubview(autoDetectButton)
+
         // Help Button
         helpButton = UIButton(type: .system)
         helpButton.translatesAutoresizingMaskIntoConstraints = false
         helpButton.backgroundColor = UIColor.systemTeal
-        helpButton.setTitle("Help", for: .normal)
+        configureIconButton(helpButton, title: "Help", symbolName: "questionmark.circle")
         helpButton.setTitleColor(.white, for: .normal)
         helpButton.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
         helpButton.layer.cornerRadius = 10
@@ -544,10 +661,18 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Layout Constraints
         NSLayoutConstraint.activate([
-            infoLabel.topAnchor.constraint(equalTo: helpButton.bottomAnchor, constant: 12),
-            infoLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            infoLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            infoLabel.heightAnchor.constraint(greaterThanOrEqualToConstant: 50),
+            infoBlurView.topAnchor.constraint(equalTo: helpButton.bottomAnchor, constant: 12),
+            infoBlurView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            infoBlurView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+
+            infoLabel.topAnchor.constraint(equalTo: infoBlurView.contentView.topAnchor, constant: 10),
+            infoLabel.leadingAnchor.constraint(equalTo: infoBlurView.contentView.leadingAnchor, constant: 12),
+            infoLabel.trailingAnchor.constraint(equalTo: infoBlurView.contentView.trailingAnchor, constant: -12),
+
+            confidenceBar.topAnchor.constraint(equalTo: infoLabel.bottomAnchor, constant: 8),
+            confidenceBar.leadingAnchor.constraint(equalTo: infoBlurView.contentView.leadingAnchor, constant: 12),
+            confidenceBar.trailingAnchor.constraint(equalTo: infoBlurView.contentView.trailingAnchor, constant: -12),
+            confidenceBar.bottomAnchor.constraint(equalTo: infoBlurView.contentView.bottomAnchor, constant: -10),
             
             resetButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -30),
             resetButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
@@ -574,10 +699,179 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             settingsButton.widthAnchor.constraint(equalToConstant: 90),
             settingsButton.heightAnchor.constraint(equalToConstant: 36),
 
+            autoDetectButton.topAnchor.constraint(equalTo: settingsButton.bottomAnchor, constant: 8),
+            autoDetectButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            autoDetectButton.widthAnchor.constraint(equalToConstant: 90),
+            autoDetectButton.heightAnchor.constraint(equalToConstant: 36),
+
             helpButton.topAnchor.constraint(equalTo: diagnosticsButton.bottomAnchor, constant: 8),
             helpButton.trailingAnchor.constraint(equalTo: diagnosticsButton.trailingAnchor),
             helpButton.widthAnchor.constraint(equalToConstant: 110),
             helpButton.heightAnchor.constraint(equalToConstant: 36)
         ])
+
+        applyButtonStyles()
+        setupOverlays()
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        updateOverlayPaths()
+        updateGradientFrames()
+    }
+
+    private func setupOverlays() {
+        crosshairLayer.strokeColor = UIColor.white.withAlphaComponent(0.6).cgColor
+        crosshairLayer.lineWidth = 1.0
+        crosshairLayer.fillColor = UIColor.clear.cgColor
+        sceneView.layer.addSublayer(crosshairLayer)
+
+        gridLayer.strokeColor = UIColor.white.withAlphaComponent(0.15).cgColor
+        gridLayer.lineWidth = 0.5
+        gridLayer.fillColor = UIColor.clear.cgColor
+        sceneView.layer.addSublayer(gridLayer)
+    }
+
+    private func updateOverlayPaths() {
+        let bounds = sceneView.bounds
+        let center = CGPoint(x: bounds.midX, y: bounds.midY)
+        let crosshair = UIBezierPath()
+        crosshair.move(to: CGPoint(x: center.x - 16, y: center.y))
+        crosshair.addLine(to: CGPoint(x: center.x + 16, y: center.y))
+        crosshair.move(to: CGPoint(x: center.x, y: center.y - 16))
+        crosshair.addLine(to: CGPoint(x: center.x, y: center.y + 16))
+        crosshairLayer.path = crosshair.cgPath
+
+        let grid = UIBezierPath()
+        let thirdW = bounds.width / 3
+        let thirdH = bounds.height / 3
+        for i in 1...2 {
+            let x = CGFloat(i) * thirdW
+            grid.move(to: CGPoint(x: x, y: 0))
+            grid.addLine(to: CGPoint(x: x, y: bounds.height))
+            let y = CGFloat(i) * thirdH
+            grid.move(to: CGPoint(x: 0, y: y))
+            grid.addLine(to: CGPoint(x: bounds.width, y: y))
+        }
+        gridLayer.path = grid.cgPath
+    }
+
+    private func updateGridVisibility() {
+        gridLayer.isHidden = !AppSettings.shared.showGridOverlay
+    }
+
+    private func applyButtonStyles() {
+        [resetButton, undoButton, diagnosticsButton, helpButton, historyButton, settingsButton, autoDetectButton].forEach {
+            $0.layer.shadowColor = UIColor.black.cgColor
+            $0.layer.shadowOpacity = 0.2
+            $0.layer.shadowOffset = CGSize(width: 0, height: 2)
+            $0.layer.shadowRadius = 4
+        }
+    }
+
+    private func updateGradientFrames() {
+        [resetButton, undoButton, diagnosticsButton, helpButton, historyButton, settingsButton, autoDetectButton].forEach {
+            applyGradient(to: $0)
+        }
+    }
+
+    private func applyGradient(to button: UIButton) {
+        let gradientName = "gradientLayer"
+        button.layer.sublayers?.removeAll(where: { $0.name == gradientName })
+        let gradient = CAGradientLayer()
+        gradient.name = gradientName
+        gradient.frame = button.bounds
+        gradient.cornerRadius = button.layer.cornerRadius
+        gradient.colors = [
+            button.backgroundColor?.withAlphaComponent(0.9).cgColor ?? UIColor.systemBlue.cgColor,
+            button.backgroundColor?.withAlphaComponent(1.0).cgColor ?? UIColor.systemTeal.cgColor
+        ]
+        button.layer.insertSublayer(gradient, at: 0)
+    }
+
+    private func configureIconButton(_ button: UIButton, title: String, symbolName: String) {
+        let image = UIImage(systemName: symbolName)
+        button.setImage(image, for: .normal)
+        button.setTitle(" " + title, for: .normal)
+        button.tintColor = .white
+        button.setTitleColor(.white, for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
+        button.contentEdgeInsets = UIEdgeInsets(top: 6, left: 8, bottom: 6, right: 8)
+    }
+
+    private func applyTheme() {
+        switch AppSettings.shared.theme {
+        case .system:
+            overrideUserInterfaceStyle = .unspecified
+        case .light:
+            overrideUserInterfaceStyle = .light
+        case .dark:
+            overrideUserInterfaceStyle = .dark
+        }
+    }
+
+    private func applyDistanceColor(distanceMeters: Float) {
+        let color: UIColor
+        if distanceMeters < 3.0 {
+            color = .systemGreen
+        } else if distanceMeters < 10.0 {
+            color = .systemYellow
+        } else {
+            color = .systemRed
+        }
+        infoLabel.textColor = color
+        confidenceBar.progressTintColor = color
+    }
+
+    private func applyDetectedBoundingBox(_ bbox: CGRect, frame: ARFrame) {
+        // Reset current measurement visuals
+        resetMeasurement()
+
+        let topNormalized = CGPoint(x: bbox.midX, y: bbox.maxY)
+        let bottomNormalized = CGPoint(x: bbox.midX, y: bbox.minY)
+
+        let topPoint = convertNormalizedPointToView(topNormalized, frame: frame)
+        let bottomPoint = convertNormalizedPointToView(bottomNormalized, frame: frame)
+
+        startPoint = topPoint
+        endPoint = bottomPoint
+
+        drawMarker(at: topPoint, isStart: true)
+        drawMarker(at: bottomPoint, isStart: false)
+        drawLine()
+
+        askForObjectHeight()
+    }
+
+    private func convertNormalizedPointToView(_ point: CGPoint, frame: ARFrame) -> CGPoint {
+        // Vision bounding box uses normalized coordinates with origin at bottom-left.
+        let normalized = CGPoint(x: point.x, y: 1.0 - point.y)
+        let transform = frame.displayTransform(for: view.bounds.size)
+        let transformed = normalized.applying(transform)
+        return CGPoint(x: transformed.x * view.bounds.width, y: transformed.y * view.bounds.height)
+    }
+
+    private func cgImageOrientation() -> CGImagePropertyOrientation {
+        let orientation = view.window?.windowScene?.interfaceOrientation ?? .portrait
+        switch orientation {
+        case .portrait:
+            return .right
+        case .portraitUpsideDown:
+            return .left
+        case .landscapeLeft:
+            return .up
+        case .landscapeRight:
+            return .down
+        default:
+            return .right
+        }
+    }
+
+    private func presentSimpleAlert(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        if presentedViewController == nil {
+            present(alert, animated: true)
+        }
     }
 }

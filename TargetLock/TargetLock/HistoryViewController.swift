@@ -30,6 +30,12 @@ class HistoryViewController: UITableViewController {
         refreshStats()
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        tableView.reloadData()
+        refreshStats()
+    }
+
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         updateHeaderLayout()

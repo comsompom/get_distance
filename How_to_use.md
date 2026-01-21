@@ -22,6 +22,11 @@ This project was created to support the Moon Home Agency initiative: https://moo
 - A **yellow dashed line** will connect the two markers
 - A popup dialog will appear asking for the object's height
 
+### Optional: Auto Detect
+- Tap **Auto** to detect a person automatically
+- The app marks the top and bottom points for you
+- If detection fails, use manual taps as usual
+
 ### Step 3: Select the Object's Height
 - Choose a **preset** from the list:
   - Adult Male (1.75m)
@@ -62,6 +67,8 @@ Tap **Help** to see short instructions on:
 
 - Tap **Settings** to choose how distances are displayed
 - Options: meters, feet, or both
+- Use **Show Grid Overlay** to toggle the alignment grid
+- Choose **Theme** to use system, light, or dark appearance
 
 ## Starting a New Measurement
 

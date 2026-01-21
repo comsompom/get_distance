@@ -23,6 +23,7 @@ TargetLock/
 │   ├── Info.plist                    # App configuration and permissions
 │   ├── Assets.xcassets/              # App assets (icons, images)
 │   │   ├── AppIcon.appiconset/        # App icon assets
+│   │   ├── LaunchImage.imageset/      # Launch screen image
 │   │   └── Contents.json
 │   └── Base.lproj/                    # Localization resources
 │       └── LaunchScreen.storyboard    # Launch screen

@@ -58,6 +58,13 @@ If the `.xcodeproj` file doesn't exist, you'll need to create it:
    - `ViewController.swift`
    - `HistoryViewController.swift`
    - `Measurement.swift`
+   - `SettingsViewController.swift`
+   - `TutorialViewController.swift`
+   - `MeasurementCalculator.swift`
+   - `Preset.swift`
+   - `PresetManager.swift`
+   - `HapticFeedbackManager.swift`
+   - `AppSettings.swift`
    - `DiagnosticsViewController.swift`
    - `AppDelegate.swift`
    - `SceneDelegate.swift`

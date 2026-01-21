@@ -44,6 +44,7 @@ Where:
 | 🔧 **Automatic Calibration** | Uses factory-calibrated camera intrinsics from your iPhone (iPhone 6s and newer) |
 | 📊 **Real-Time Display** | Shows distance in both meters and feet simultaneously |
 | 🎨 **Visual Feedback** | Green and red markers with connecting yellow line for clear visualization |
+| 🎯 **Crosshair & Grid** | Optional grid overlay and crosshair for precise alignment |
 | 🔄 **Reset Functionality** | Easy reset button to start a new measurement |
 | 🔬 **Diagnostics Screen** | View ARKit support, device model, and camera intrinsics |
 | ❓ **Help Button** | Quick in‑app usage and calibration guidance |
@@ -54,6 +55,8 @@ Where:
 | 📤 **Share/Export** | Share a measurement summary via system share sheet |
 | ⚙️ **Settings** | Choose units display (meters, feet, or both) |
 | 📘 **Tutorial** | Built-in quick tutorial for first-time users |
+| 🎨 **Theme & Range Colors** | System/light/dark theme and distance color cues |
+| 🧍 **Auto Detection** | Vision-based human detection to auto-mark top/bottom |
 
 ## Technical Requirements
 
@@ -121,6 +124,15 @@ TargetLock/
 ├── TargetLock/
 │   ├── ViewController.swift          # Main AR view controller
 │   ├── DiagnosticsViewController.swift # Diagnostics screen
+│   ├── HistoryViewController.swift   # Measurement history
+│   ├── SettingsViewController.swift  # Settings (units/theme)
+│   ├── TutorialViewController.swift  # Tutorial
+│   ├── Measurement.swift             # Measurement model
+│   ├── MeasurementCalculator.swift   # Distance calculation helper
+│   ├── Preset.swift                  # Height preset model
+│   ├── PresetManager.swift           # Height preset provider
+│   ├── HapticFeedbackManager.swift   # Haptics helper
+│   ├── AppSettings.swift             # UserDefaults-backed settings
 │   ├── AppDelegate.swift             # App lifecycle
 │   ├── SceneDelegate.swift           # Scene management
 │   └── Assets.xcassets/              # App icons and assets
