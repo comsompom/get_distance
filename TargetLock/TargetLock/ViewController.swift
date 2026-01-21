@@ -38,6 +38,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        haptics.prepare()
         NotificationCenter.default.addObserver(self, selector: #selector(handleSettingsChange), name: .appSettingsDidChange, object: nil)
         
         // Configure AR View
@@ -77,6 +78,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
 
         updateGridVisibility()
+        warmUpFirstMeasurement()
     }
 
     deinit {
@@ -361,6 +363,23 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             updateInfoDisplay(distanceMeters: distance, confidence: confidence, angleDegrees: angle)
         }
     }
+
+    private func warmUpFirstMeasurement() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
+            guard let self = self, let frame = self.sceneView.session.currentFrame else { return }
+            // Precompute once to avoid first-use lag from formatting and confidence math.
+            let dummyPixelHeight: Float = 200
+            let dummyHeight: Float = 1.7
+            let focal = frame.camera.intrinsics.columns.1.y
+            let distance = self.measurementCalculator.calculateDistanceMeters(
+                focalLengthPixels: focal,
+                realHeightMeters: dummyHeight,
+                pixelHeight: dummyPixelHeight
+            )
+            _ = self.computeConfidence(distanceMeters: distance, pixelHeight: dummyPixelHeight, frame: frame)
+            _ = self.formatDistanceLabel(distanceMeters: distance, confidence: 0.5, angleDegrees: 0)
+        }
+    }
     
     // MARK: - Reset Logic
     @objc func resetMeasurement() {
@@ -609,7 +628,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         diagnosticsButton = UIButton(type: .system)
         diagnosticsButton.translatesAutoresizingMaskIntoConstraints = false
         diagnosticsButton.backgroundColor = UIColor.systemGray
-        configureIconButton(diagnosticsButton, title: "Diagnostics", symbolName: "wrench.and.screwdriver")
+        configureIconButton(diagnosticsButton, title: "Diag", symbolName: "wrench.and.screwdriver")
         diagnosticsButton.setTitleColor(.white, for: .normal)
         diagnosticsButton.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
         diagnosticsButton.layer.cornerRadius = 10
@@ -687,27 +706,27 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
             diagnosticsButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
             diagnosticsButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            diagnosticsButton.widthAnchor.constraint(equalToConstant: 110),
+            diagnosticsButton.widthAnchor.constraint(equalToConstant: 120),
             diagnosticsButton.heightAnchor.constraint(equalToConstant: 36),
 
             historyButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
             historyButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            historyButton.widthAnchor.constraint(equalToConstant: 90),
+            historyButton.widthAnchor.constraint(equalToConstant: 120),
             historyButton.heightAnchor.constraint(equalToConstant: 36),
 
             settingsButton.topAnchor.constraint(equalTo: historyButton.bottomAnchor, constant: 8),
             settingsButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            settingsButton.widthAnchor.constraint(equalToConstant: 90),
+            settingsButton.widthAnchor.constraint(equalToConstant: 120),
             settingsButton.heightAnchor.constraint(equalToConstant: 36),
 
             autoDetectButton.topAnchor.constraint(equalTo: settingsButton.bottomAnchor, constant: 8),
             autoDetectButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            autoDetectButton.widthAnchor.constraint(equalToConstant: 90),
+            autoDetectButton.widthAnchor.constraint(equalToConstant: 120),
             autoDetectButton.heightAnchor.constraint(equalToConstant: 36),
 
             helpButton.topAnchor.constraint(equalTo: diagnosticsButton.bottomAnchor, constant: 8),
             helpButton.trailingAnchor.constraint(equalTo: diagnosticsButton.trailingAnchor),
-            helpButton.widthAnchor.constraint(equalToConstant: 110),
+            helpButton.widthAnchor.constraint(equalToConstant: 120),
             helpButton.heightAnchor.constraint(equalToConstant: 36)
         ])
 
@@ -797,6 +816,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         button.tintColor = .white
         button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
+        button.titleLabel?.adjustsFontSizeToFitWidth = true
+        button.titleLabel?.minimumScaleFactor = 0.8
         button.contentEdgeInsets = UIEdgeInsets(top: 6, left: 8, bottom: 6, right: 8)
     }
 

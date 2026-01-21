@@ -1,8 +1,13 @@
 import UIKit
 
 class HapticFeedbackManager {
+    private let generator = UIImpactFeedbackGenerator(style: .light)
+
+    func prepare() {
+        generator.prepare()
+    }
+
     func impactLight() {
-        let generator = UIImpactFeedbackGenerator(style: .light)
         generator.prepare()
         generator.impactOccurred()
     }
