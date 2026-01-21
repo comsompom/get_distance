@@ -475,7 +475,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                 return
             }
 
-            guard let observation = (request.results as? [VNHumanObservation])?.first else {
+            // VNDetectHumanRectanglesRequest returns VNDetectedObjectObservation in iOS 13+
+            guard let observation = (request.results as? [VNDetectedObjectObservation])?.first else {
                 self.presentSimpleAlert(title: "No Person Found", message: "Try again with a clearer view of the person.")
                 return
             }
@@ -484,7 +485,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                 self.applyDetectedBoundingBox(observation.boundingBox, frame: frame)
             }
         }
-        request.maximumObservations = 1
+        // Note: maximumObservations is not available in iOS 13, so we just use the first result
 
         let handler = VNImageRequestHandler(
             cvPixelBuffer: frame.capturedImage,
@@ -846,7 +847,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     private func convertNormalizedPointToView(_ point: CGPoint, frame: ARFrame) -> CGPoint {
         // Vision bounding box uses normalized coordinates with origin at bottom-left.
         let normalized = CGPoint(x: point.x, y: 1.0 - point.y)
-        let transform = frame.displayTransform(for: view.bounds.size)
+        let interfaceOrientation = view.window?.windowScene?.interfaceOrientation ?? .portrait
+        let transform = frame.displayTransform(for: interfaceOrientation, viewportSize: view.bounds.size)
         let transformed = normalized.applying(transform)
         return CGPoint(x: transformed.x * view.bounds.width, y: transformed.y * view.bounds.height)
     }
