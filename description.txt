@@ -1,0 +1,8 @@
+it will be the iphone iOS application which will show on
+the screen the distance to the object based on the focal
+length. If we need to calibrate the camera for this before then
+we need the calibration setup. Then user in the AR mode should
+click on the object, lets say that all time it will be humans
+or animals as soon as we know their height. It means the user
+will click the human on the AR mode on the screen and set his
+height and the phone must show the distance to that object.
