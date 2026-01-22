@@ -193,6 +193,7 @@ This document outlines suggestions to make TargetLock more attractive, user-frie
 - Animations & feedback (haptics, marker/line animations)
 - Visual indicators (crosshair, grid, angle)
 - Theme customization + distance range colors
+- Zoom with distance correction
 - README structure improvements (quick start, comparison, FAQ, troubleshooting)
 - Contributing guidelines
 - Changelog

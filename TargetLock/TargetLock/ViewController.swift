@@ -28,6 +28,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var lastDistanceMeters: Float?
     var lastConfidence: Float?
     var lastAngleDegrees: Float?
+    var baseFieldOfView: CGFloat?
+    var zoomFactor: Float = 1.0
+    let minZoomFactor: Float = 1.0
+    let maxZoomFactor: Float = 4.0
 
     private let presetManager = PresetManager()
     private let measurementCalculator: MeasurementCalculating = MeasurementCalculator()
@@ -48,6 +52,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Add Tap Gesture
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap(_:)))
         sceneView.addGestureRecognizer(tapGesture)
+
+        // Add Pinch Gesture for zoom
+        let pinchGesture = UIPinchGestureRecognizer(target: self, action: #selector(handlePinch(_:)))
+        sceneView.addGestureRecognizer(pinchGesture)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -77,6 +85,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
         updateGridVisibility()
         warmUpFirstMeasurement()
+        captureBaseFieldOfViewIfNeeded()
     }
 
     deinit {
@@ -129,7 +138,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // 2. Get Focal Length from Camera Intrinsics
         // ARKit provides a 3x3 matrix. column 1, row 1 (yy) is the focal length in pixels for the Y axis.
-        let focalLengthPixels = currentFrame.camera.intrinsics.columns.1.y
+        let focalLengthPixels = currentFrame.camera.intrinsics.columns.1.y * zoomFactor
         
         // 3. Apply Formula: Distance = (FocalLength * RealHeight) / ImageHeight
         let distanceMeters = measurementCalculator.calculateDistanceMeters(
@@ -331,13 +340,14 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let feet = distanceMeters * 3.28084
         let confidenceText = String(format: "Confidence: %.0f%%", confidence * 100)
         let angleText = String(format: "Angle: %.0f°", angleDegrees)
+        let zoomText = String(format: "Zoom: %.1fx", zoomFactor)
         switch AppSettings.shared.displayUnit {
         case .meters:
-            return String(format: "Distance: %.2f meters\n%@ • %@", distanceMeters, confidenceText, angleText)
+            return String(format: "Distance: %.2f meters\n%@ • %@ • %@", distanceMeters, confidenceText, angleText, zoomText)
         case .feet:
-            return String(format: "Distance: %.1f ft\n%@ • %@", feet, confidenceText, angleText)
+            return String(format: "Distance: %.1f ft\n%@ • %@ • %@", feet, confidenceText, angleText, zoomText)
         case .both:
-            return String(format: "Distance: %.2f meters (%.1f ft)\n%@ • %@", distanceMeters, feet, confidenceText, angleText)
+            return String(format: "Distance: %.2f meters (%.1f ft)\n%@ • %@ • %@", distanceMeters, feet, confidenceText, angleText, zoomText)
         }
     }
 
@@ -360,6 +370,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
            let angle = lastAngleDegrees {
             updateInfoDisplay(distanceMeters: distance, confidence: confidence, angleDegrees: angle)
         }
+    }
+
+    private func captureBaseFieldOfViewIfNeeded() {
+        guard baseFieldOfView == nil, let camera = sceneView.pointOfView?.camera else { return }
+        baseFieldOfView = camera.fieldOfView
     }
 
     private func warmUpFirstMeasurement() {
@@ -470,6 +485,27 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         navController.modalPresentationStyle = .formSheet
         if presentedViewController == nil {
             present(navController, animated: true)
+        }
+    }
+
+    @objc func handlePinch(_ gesture: UIPinchGestureRecognizer) {
+        guard let camera = sceneView.pointOfView?.camera else { return }
+        captureBaseFieldOfViewIfNeeded()
+        guard let baseFov = baseFieldOfView else { return }
+
+        let currentFov = camera.fieldOfView
+        let newFov = currentFov / gesture.scale
+        let minFov = baseFov / CGFloat(maxZoomFactor)
+        let maxFov = baseFov / CGFloat(minZoomFactor)
+        camera.fieldOfView = max(minFov, min(maxFov, newFov))
+
+        zoomFactor = Float(baseFov / camera.fieldOfView)
+        gesture.scale = 1.0
+
+        if let distance = lastDistanceMeters,
+           let confidence = lastConfidence,
+           let angle = lastAngleDegrees {
+            updateInfoDisplay(distanceMeters: distance, confidence: confidence, angleDegrees: angle)
         }
     }
 

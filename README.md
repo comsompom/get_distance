@@ -56,6 +56,7 @@ Where:
 | ⚙️ **Settings** | Choose units display (meters, feet, or both) |
 | 📘 **Tutorial** | Built-in quick tutorial for first-time users |
 | 🎨 **Theme & Range Colors** | System/light/dark theme and distance color cues |
+| 🔍 **Zoom** | Pinch-to-zoom with corrected distance calculation |
 
 ## Technical Requirements
 

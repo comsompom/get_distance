@@ -22,6 +22,10 @@ This project was created to support the Moon Home Agency initiative: https://moo
 - A **yellow dashed line** will connect the two markers
 - A popup dialog will appear asking for the object's height
 
+### Optional: Zoom
+- Pinch with two fingers to zoom in/out
+- The distance calculation is corrected automatically for zoom
+
 ### Step 3: Select the Object's Height
 - Choose a **preset** from the list:
   - Adult Male (1.75m)
