@@ -22,7 +22,18 @@
 		AA000001000000000000000D /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000000F /* AppSettings.swift */; };
 		AA000001000000000000000E /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000010 /* SettingsViewController.swift */; };
 		AA000001000000000000000F /* TutorialViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000011 /* TutorialViewController.swift */; };
+		AA0000010000000000000100 /* TargetLockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000100 /* TargetLockTests.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		AA00000C0000000000000100 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA00000B0000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AA0000070000000000000001;
+			remoteInfo = TargetLock;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		AA0000000000000000000001 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -42,10 +53,19 @@
 		AA000000000000000000000F /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
 		AA0000000000000000000010 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		AA0000000000000000000011 /* TutorialViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorialViewController.swift; sourceTree = "<group>"; };
+		AA0000000000000000000100 /* TargetLockTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TargetLockTests.swift; sourceTree = "<group>"; };
+		AA0000000000000000000101 /* TargetLockTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TargetLockTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		AA0000020000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA0000020000000000000100 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -59,6 +79,7 @@
 			isa = PBXGroup;
 			children = (
 				AA0000040000000000000001 /* TargetLock */,
+				AA0000030000000000000100 /* TargetLockTests */,
 				AA0000050000000000000001 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -90,8 +111,17 @@
 			isa = PBXGroup;
 			children = (
 				AA0000000000000000000007 /* TargetLock.app */,
+				AA0000000000000000000101 /* TargetLockTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		AA0000030000000000000100 /* TargetLockTests */ = {
+			isa = PBXGroup;
+			children = (
+				AA0000000000000000000100 /* TargetLockTests.swift */,
+			);
+			path = TargetLockTests;
 			sourceTree = "<group>";
 		};
 		AA0000060000000000000001 /* Base.lproj */ = {
@@ -122,6 +152,24 @@
 			productReference = AA0000000000000000000007 /* TargetLock.app */;
 			productType = "com.apple.product-type.application";
 		};
+		AA0000070000000000000100 /* TargetLockTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA0000080000000000000100 /* Build configuration list for PBXNativeTarget "TargetLockTests" */;
+			buildPhases = (
+				AA0000090000000000000100 /* Sources */,
+				AA0000020000000000000100 /* Frameworks */,
+				AA00000A0000000000000100 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AA00000D0000000000000100 /* PBXTargetDependency */,
+			);
+			name = TargetLockTests;
+			productName = TargetLockTests;
+			productReference = AA0000000000000000000101 /* TargetLockTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -151,6 +199,7 @@
 			projectRoot = "";
 			targets = (
 				AA0000070000000000000001 /* TargetLock */,
+				AA0000070000000000000100 /* TargetLockTests */,
 			);
 		};
 /* End PBXProject section */
@@ -162,6 +211,13 @@
 			files = (
 				AA0000010000000000000005 /* Base in Resources */,
 				AA0000010000000000000004 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA00000A0000000000000100 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -188,7 +244,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AA0000090000000000000100 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA0000010000000000000100 /* TargetLockTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		AA00000D0000000000000100 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AA0000070000000000000001 /* TargetLock */;
+			targetProxy = AA00000C0000000000000100 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		AA00000D0000000000000001 /* Debug */ = {
@@ -370,6 +442,46 @@
 			};
 			name = Release;
 		};
+		AA00000F0000000000000100 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 6X42CRDLS6;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.TargetLockTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TargetLock.app/TargetLock";
+			};
+			name = Debug;
+		};
+		AA0000100000000000000100 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 6X42CRDLS6;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.TargetLockTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TargetLock.app/TargetLock";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -378,6 +490,15 @@
 			buildConfigurations = (
 				AA00000F0000000000000001 /* Debug */,
 				AA0000100000000000000001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA0000080000000000000100 /* Build configuration list for PBXNativeTarget "TargetLockTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA00000F0000000000000100 /* Debug */,
+				AA0000100000000000000100 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
