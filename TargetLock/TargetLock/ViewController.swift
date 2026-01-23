@@ -28,7 +28,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var lastDistanceMeters: Float?
     var lastConfidence: Float?
     var lastAngleDegrees: Float?
-    var baseFieldOfView: CGFloat?
     var zoomFactor: Float = 1.0
     let minZoomFactor: Float = 1.0
     let maxZoomFactor: Float = 4.0
@@ -85,7 +84,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
         updateGridVisibility()
         warmUpFirstMeasurement()
-        captureBaseFieldOfViewIfNeeded()
     }
 
     deinit {
@@ -372,11 +370,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         }
     }
 
-    private func captureBaseFieldOfViewIfNeeded() {
-        guard baseFieldOfView == nil, let camera = sceneView.pointOfView?.camera else { return }
-        baseFieldOfView = camera.fieldOfView
-    }
-
     private func warmUpFirstMeasurement() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
             guard let self = self, let frame = self.sceneView.session.currentFrame else { return }
@@ -489,17 +482,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
 
     @objc func handlePinch(_ gesture: UIPinchGestureRecognizer) {
-        guard let camera = sceneView.pointOfView?.camera else { return }
-        captureBaseFieldOfViewIfNeeded()
-        guard let baseFov = baseFieldOfView else { return }
-
-        let currentFov = camera.fieldOfView
-        let newFov = currentFov / gesture.scale
-        let minFov = baseFov / CGFloat(maxZoomFactor)
-        let maxFov = baseFov / CGFloat(minZoomFactor)
-        camera.fieldOfView = max(minFov, min(maxFov, newFov))
-
-        zoomFactor = Float(baseFov / camera.fieldOfView)
+        let scale = Float(gesture.scale)
+        let nextZoom = max(minZoomFactor, min(maxZoomFactor, zoomFactor * scale))
+        zoomFactor = nextZoom
+        sceneView.transform = CGAffineTransform(scaleX: CGFloat(zoomFactor), y: CGFloat(zoomFactor))
+        sceneView.center = view.center
         gesture.scale = 1.0
 
         if let distance = lastDistanceMeters,
